@@ -1,0 +1,1081 @@
+{
+  "data": {
+    "attributes": {
+      "best_description": "<p>The Kraken Hockey League Features Divisions 1 to 10, and sub-divisions A to D. Division 1 is the highest level and Division 10 is beginner level.<br /><br />Deposit required to register a team is $100. This deposit will go towards the Captain's season payment. You will have the opportunity to add your roster of players and assign payment amounts per player after your check out step.</p>",
+      "best_free_trial_customer_limit": null,
+      "best_free_trial_cutoff": null,
+      "best_free_trial_days_before": null,
+      "best_free_trial_hours_before": 0,
+      "best_image_url": "https://dash-general.s3.us-west-2.amazonaws.com/kraken/f46930b4-369c-4e92-925a-13d6bc8bb362.png",
+      "best_is_makeups_enabled": false,
+      "best_makeups_above_roster_limit": null,
+      "best_makeups_max_per_event": null,
+      "best_makeups_signup_end_hours_before": null,
+      "best_makeups_signup_start_hours_before": null,
+      "color": "#d40606",
+      "days_of_week": [],
+      "description": "<p>The Kraken Hockey League Features Divisions 1 to 10, and sub-divisions A to D. Division 1 is the highest level and Division 10 is beginner level.<br /><br />Deposit required to register a team is $100. This deposit will go towards the Captain's season payment. You will have the opportunity to add your roster of players and assign payment amounts per player after your check out step.</p>",
+      "event_length": null,
+      "facility_id": 1,
+      "free_trial_cutoff": null,
+      "free_trial_days_before": null,
+      "free_trial_hours_before": null,
+      "free_trial_opt_out": true,
+      "has_free_trials": false,
+      "has_upcoming_events": true,
+      "image_url": "https://dash-general.s3.us-west-2.amazonaws.com/kraken/f46930b4-369c-4e92-925a-13d6bc8bb362.png",
+      "is_flat_fee": 0,
+      "is_makeups_enabled": 0,
+      "is_private": true,
+      "is_registration_open": true,
+      "league_id": 2407,
+      "makeups_above_roster_limit": null,
+      "makeups_max_per_event": null,
+      "makeups_signup_end_hours_before": null,
+      "makeups_signup_start_hours_before": null,
+      "max_free_trials": null,
+      "max_roster_size": 25,
+      "min_roster_size": null,
+      "name": "Yacht Flippers",
+      "num_games": 25,
+      "product_id": null,
+      "season_id": 613,
+      "sex": "c",
+      "start_date": "2025-09-21T00:00:00",
+      "status": "active",
+      "team_type": "t"
+    },
+    "id": "11007",
+    "links": {
+      "self": "https://apps.daysmartrecreation.com/dash/jsonapi/api/v1/teams/11007"
+    },
+    "relationships": {
+      "ageRange": {
+        "data": {
+          "id": "25",
+          "type": "age-ranges"
+        }
+      },
+      "allEvents": [],
+      "copiedFromTeams": [],
+      "copiedToTeams": [],
+      "customFieldAnswers": [],
+      "customForm": [],
+      "customerInvoices": [],
+      "customers": [],
+      "employee": [],
+      "events": {
+        "data": [
+          {
+            "id": "312149",
+            "type": "events"
+          },
+          {
+            "id": "313466",
+            "type": "events"
+          },
+          {
+            "id": "314460",
+            "type": "events"
+          }
+        ]
+      },
+      "expenses": [],
+      "facility": [],
+      "files": [],
+      "finances": [],
+      "homeEvents": [],
+      "invoiceItems": [],
+      "invoices": [],
+      "league": {
+        "data": {
+          "id": "2407",
+          "type": "leagues"
+        }
+      },
+      "managers": [],
+      "nextHomeEvent": [],
+      "nextVisitingEvent": [],
+      "notes": [],
+      "playoffEvents": [],
+      "product": {
+        "data": null
+      },
+      "programType": {
+        "data": {
+          "id": "3",
+          "type": "program-types"
+        }
+      },
+      "purchaseOrders": [],
+      "registeredCustomers": [],
+      "registrableEvents": [],
+      "registrationInfo": [],
+      "registrations": [],
+      "rsvpStates": [],
+      "season": {
+        "data": {
+          "id": "613",
+          "type": "seasons"
+        }
+      },
+      "skillLevel": {
+        "data": {
+          "id": "8",
+          "type": "skill-levels"
+        }
+      },
+      "sport": {
+        "data": {
+          "id": "20",
+          "type": "sports"
+        }
+      },
+      "statEvents": [],
+      "teamMessages": [],
+      "teamRequests": [],
+      "visitingEvents": [],
+      "waitlistRegistrations": []
+    },
+    "type": "teams"
+  },
+  "included": [
+    {
+      "attributes": {
+        "billing_type": "team",
+        "is_active": true,
+        "name": "Team",
+        "old_team_type_code": "t"
+      },
+      "id": "3",
+      "relationships": {
+        "seasons": [],
+        "teams": []
+      },
+      "type": "program-types"
+    },
+    {
+      "attributes": {
+        "age_range_id": 25,
+        "best_description": "<p>The Kraken Hockey League Features Divisions 1 to 10, and sub-divisions A to D. Division 1 is the highest level and Division 10 is beginner level.<br /><br />Deposit required to register a team is $100. This deposit will go towards the Captain's season payment. You will have the opportunity to add your roster of players and assign payment amounts per player after your check out step.</p>",
+        "best_free_trial_customer_limit": null,
+        "best_free_trial_cutoff": null,
+        "best_free_trial_days_before": null,
+        "best_free_trial_hours_before": null,
+        "best_image_url": "https://dash-general.s3.us-west-2.amazonaws.com/kraken/c021979c-9cfc-46d4-9adb-156e90d0b6b7/BoKGPjgA%20DS.png",
+        "best_is_makeups_enabled": false,
+        "best_makeups_above_roster_limit": null,
+        "best_makeups_max_per_event": null,
+        "best_makeups_signup_end_hours_before": null,
+        "best_makeups_signup_start_hours_before": null,
+        "best_max_free_trials": null,
+        "days_of_week": null,
+        "default_registration_option": "Player",
+        "description": "<p>The Kraken Hockey League Features Divisions 1 to 10, and sub-divisions A to D. Division 1 is the highest level and Division 10 is beginner level.<br /><br />Deposit required to register a team is $100. This deposit will go towards the Captain's season payment. You will have the opportunity to add your roster of players and assign payment amounts per player after your check out step.</p>",
+        "display_standings": 0,
+        "event_selection": false,
+        "event_selection_weekly": false,
+        "facility_id": 1,
+        "free_trial_customer_limit": null,
+        "free_trial_cutoff": null,
+        "free_trial_days_before": null,
+        "free_trial_hours_before": 0,
+        "free_trial_opt_out": true,
+        "hide_private_teams": true,
+        "image_url": null,
+        "is_flat_fee": 0,
+        "is_makeups_enabled": false,
+        "makeups_above_roster_limit": null,
+        "makeups_max_per_event": null,
+        "makeups_signup_end_hours_before": null,
+        "makeups_signup_start_hours_before": null,
+        "max_age": 99,
+        "max_age_months": 0,
+        "max_birthdate": "2007-09-21T00:00:00",
+        "max_free_trials": null,
+        "max_teams": 0,
+        "member_app_cost_display_mode": "total_price_only",
+        "min_age": 18,
+        "min_age_months": 0,
+        "min_birthdate": "1926-09-21T00:00:00",
+        "name": "Kraken Hockey League - Fall/Winter 2025-26",
+        "program_id": 3,
+        "prorating": false,
+        "registration_closed": false,
+        "registration_prod_id": null,
+        "rosters_lock_date": "2026-01-01T00:00:00",
+        "rosters_lock_date_gmt": "2026-01-01T08:00:00",
+        "season_id": 613,
+        "sex": "c",
+        "skill_level_id": 8,
+        "sport_id": 20,
+        "sportsninja_schedule_id": null,
+        "standings_type": 3,
+        "start_date": "2025-09-21T00:00:00"
+      },
+      "id": "2407",
+      "relationships": {
+        "ageRange": [],
+        "customForm": [],
+        "emailTemplate": [],
+        "facility": [],
+        "files": [],
+        "freeTrialEmailTemplate": [],
+        "houseProduct": [],
+        "individualProduct": [],
+        "info": [],
+        "leagueDetails": [],
+        "makeupsEmailTemplate": [],
+        "paymentPlan": [],
+        "playoffEvents": {
+          "data": []
+        },
+        "prereqLevel": [],
+        "priorLeague": [],
+        "priorYearLeague": [],
+        "program": [],
+        "programType": {
+          "data": {
+            "id": "3",
+            "type": "program-types"
+          }
+        },
+        "registrationEmailTemplate": [],
+        "registrationProduct": [],
+        "season": [],
+        "skillLevel": [],
+        "sport": [],
+        "teamProduct": [],
+        "teams": []
+      },
+      "type": "leagues"
+    },
+    {
+      "attributes": {
+        "best_is_makeups_enabled": false,
+        "description": "<p>The Kraken Hockey League Features Divisions 1 to 10, and sub-divisions A to D. Division 1 is the highest level and Division 10 is beginner level.<br /><br />Deposit required to register a team is $100. This deposit will go towards the Captain's season payment. You will have the opportunity to add your roster of players and assign payment amounts per player after your check out step.</p>",
+        "enable_team_export": false,
+        "free_trial_customer_limit": null,
+        "free_trial_cutoff": null,
+        "free_trial_days_before": null,
+        "free_trial_hours_before": null,
+        "high_privacy": false,
+        "image_url": "https://dash-general.s3.us-west-2.amazonaws.com/kraken/c021979c-9cfc-46d4-9adb-156e90d0b6b7/BoKGPjgA%20DS.png",
+        "is_free_trial_enabled": false,
+        "is_makeups_enabled": false,
+        "is_team_registration": false,
+        "makeups_above_roster_limit": null,
+        "makeups_email_template_id": null,
+        "makeups_limit_per_customer": null,
+        "makeups_max_per_event": null,
+        "makeups_signup_end_hours_before": null,
+        "makeups_signup_start_hours_before": null,
+        "max_free_trials": null,
+        "name": "Kraken Hockey League - Fall/Winter 2025-26",
+        "online_registration_enabled": true,
+        "signup_end": "2025-12-31T23:59:00",
+        "signup_end_gmt": "2026-01-01T07:59:00",
+        "signup_start": "2025-07-21T09:00:00",
+        "signup_start_gmt": "2025-07-21T16:00:00",
+        "start_date": "2025-09-21T00:00:00",
+        "team_type": "t"
+      },
+      "id": "613",
+      "relationships": {
+        "activatesPriorities": [],
+        "approvalAcceptedTemplate": [],
+        "approvalDeclinedTemplate": [],
+        "approvalPendingTemplate": [],
+        "customForm": [],
+        "emailTemplate": [],
+        "facility": [],
+        "files": [],
+        "freeTrialTemplate": [],
+        "leagues": [],
+        "makeUpsTemplate": [],
+        "paymentPlan": [],
+        "priorSeason": [],
+        "priorYearSeason": [],
+        "priorities": [],
+        "program": [],
+        "programType": [],
+        "responsibleEmployee": [],
+        "teams": [],
+        "timeOfYear": []
+      },
+      "type": "seasons"
+    },
+    {
+      "attributes": {
+        "active": true,
+        "name": "NA"
+      },
+      "id": "8",
+      "relationships": {
+        "leagues": [],
+        "teams": []
+      },
+      "type": "skill-levels"
+    },
+    {
+      "attributes": {
+        "active": true,
+        "name": "Hockey",
+        "stat_table": 1
+      },
+      "id": "20",
+      "relationships": {
+        "leagues": [],
+        "stats": [],
+        "teams": []
+      },
+      "type": "sports"
+    },
+    {
+      "attributes": {
+        "display_order": 3,
+        "max_age": 0,
+        "min_age": 18,
+        "name": "Adult"
+      },
+      "id": "25",
+      "relationships": {
+        "leagues": [],
+        "teams": []
+      },
+      "type": "age-ranges"
+    },
+    {
+      "attributes": {
+        "active": true,
+        "code": "g",
+        "color": "#0C3CE8",
+        "custom_form_id": null,
+        "description": null,
+        "has_customer": false,
+        "has_roster": false,
+        "has_team_away": true,
+        "has_team_home": true,
+        "length": "01:15:00",
+        "member_app_display_name": null,
+        "name": "Game",
+        "product_id": null
+      },
+      "id": "g",
+      "relationships": {
+        "assignedFacilities": [],
+        "customForm": [],
+        "eventTypeFees": [],
+        "events": [],
+        "facilities": [],
+        "files": [],
+        "product": [],
+        "program": [],
+        "reminderEmailTemplate": [],
+        "resources": [],
+        "setupTaskAction": [],
+        "takedownTaskAction": [],
+        "termsAndConditions": []
+      },
+      "type": "event-types"
+    },
+    {
+      "attributes": {
+        "best_description": "<p>The Kraken Hockey League Features Divisions 1 to 10, and sub-divisions A to D. Division 1 is the highest level and Division 10 is beginner level.<br /><br />Deposit required to register a team is $100. This deposit will go towards the Captain's season payment. You will have the opportunity to add your roster of players and assign payment amounts per player after your check out step.</p>",
+        "best_free_trial_customer_limit": null,
+        "best_free_trial_cutoff": null,
+        "best_free_trial_days_before": null,
+        "best_free_trial_hours_before": 0,
+        "best_image_url": "https://dash-general.s3.us-west-2.amazonaws.com/kraken/099a07c4-aa2e-4521-8228-aacc126e7314.jpeg",
+        "best_is_makeups_enabled": false,
+        "best_makeups_above_roster_limit": null,
+        "best_makeups_max_per_event": null,
+        "best_makeups_signup_end_hours_before": null,
+        "best_makeups_signup_start_hours_before": null,
+        "color": "#FFFFFF",
+        "days_of_week": [
+          ""
+        ],
+        "description": "<p>The Kraken Hockey League Features Divisions 1 to 10, and sub-divisions A to D. Division 1 is the highest level and Division 10 is beginner level.<br /><br />Deposit required to register a team is $100. This deposit will go towards the Captain's season payment. You will have the opportunity to add your roster of players and assign payment amounts per player after your check out step.</p>",
+        "event_length": null,
+        "facility_id": 1,
+        "free_trial_cutoff": null,
+        "free_trial_days_before": null,
+        "free_trial_hours_before": null,
+        "free_trial_opt_out": true,
+        "has_free_trials": false,
+        "has_upcoming_events": true,
+        "image_url": "https://dash-general.s3.us-west-2.amazonaws.com/kraken/099a07c4-aa2e-4521-8228-aacc126e7314.jpeg",
+        "is_flat_fee": 0,
+        "is_makeups_enabled": 0,
+        "is_private": true,
+        "is_registration_open": true,
+        "league_id": 2407,
+        "makeups_above_roster_limit": null,
+        "makeups_max_per_event": null,
+        "makeups_signup_end_hours_before": null,
+        "makeups_signup_start_hours_before": null,
+        "max_free_trials": null,
+        "max_roster_size": null,
+        "min_roster_size": null,
+        "name": "Seal Team Sticks",
+        "num_games": 25,
+        "product_id": 40,
+        "season_id": 613,
+        "sex": "c",
+        "start_date": "2025-09-21T00:00:00",
+        "status": "active",
+        "team_type": "t"
+      },
+      "id": "10882",
+      "relationships": {
+        "ageRange": [],
+        "allEvents": [],
+        "copiedFromTeams": [],
+        "copiedToTeams": [],
+        "customFieldAnswers": [],
+        "customForm": [],
+        "customerInvoices": [],
+        "customers": [],
+        "employee": [],
+        "events": [],
+        "expenses": [],
+        "facility": [],
+        "files": [],
+        "finances": [],
+        "homeEvents": [],
+        "invoiceItems": [],
+        "invoices": [],
+        "league": [],
+        "managers": [],
+        "nextHomeEvent": [],
+        "nextVisitingEvent": [],
+        "notes": [],
+        "playoffEvents": [],
+        "product": [],
+        "programType": [],
+        "purchaseOrders": [],
+        "registeredCustomers": [],
+        "registrableEvents": [],
+        "registrationInfo": [],
+        "registrations": [],
+        "rsvpStates": [],
+        "season": [],
+        "skillLevel": [],
+        "sport": [],
+        "statEvents": [],
+        "teamMessages": [],
+        "teamRequests": [],
+        "visitingEvents": [],
+        "waitlistRegistrations": []
+      },
+      "type": "teams"
+    },
+    {
+      "attributes": {
+        "active": true,
+        "email": "KrakenCommunityIceplex@SeattleKraken.com",
+        "facilityWww": "http://www.krakencommunityiceplex.com/",
+        "lat": 47.706104,
+        "lng": -122.325123,
+        "my_sam_support": false,
+        "name": "Kraken Community Iceplex",
+        "phone": "(206) 279-7770",
+        "tz": "America/Los_Angeles"
+      },
+      "id": "1",
+      "meta": {
+        "currency": "USD"
+      },
+      "relationships": {
+        "address": [],
+        "blackoutDates": [],
+        "customers": [],
+        "employees": [],
+        "eventTypes": [],
+        "file": [],
+        "hotLists": [],
+        "inventories": [],
+        "leagues": [],
+        "lockerAreas": [],
+        "objectLabel": [],
+        "resources": [],
+        "seasons": [],
+        "teams": []
+      },
+      "type": "facilities"
+    },
+    {
+      "attributes": {
+        "booking_option_id": 4,
+        "desc": "",
+        "facility_id": 1,
+        "has_agreed_terms_and_conditions": null,
+        "lat": 47.706104,
+        "lng": -122.325123,
+        "name": "Starbucks Rink 1",
+        "terms_and_conditions_id": null,
+        "type_id": 2
+      },
+      "id": "1",
+      "relationships": {
+        "address": [],
+        "amenities": [],
+        "blockedResourceAreas": [],
+        "blockedResources": [],
+        "blockingRules": [],
+        "bookingOption": [],
+        "employee": [],
+        "eventTypes": [],
+        "facility": {
+          "data": {
+            "id": "1",
+            "type": "facilities"
+          }
+        },
+        "files": [],
+        "flattenedBlockingRules": [],
+        "inventories": [],
+        "resourceAreas": [],
+        "resourceGroups": [],
+        "resourceType": [],
+        "termsAndConditions": [],
+        "termsAndConditionsResponses": []
+      },
+      "type": "resources"
+    },
+    {
+      "attributes": {
+        "best_description": "<p>The Kraken Hockey League Features Divisions 1 to 10, and sub-divisions A to D. Division 1 is the highest level and Division 10 is beginner level.<br /><br />Deposit required to register a team is $100. This deposit will go towards the Captain's season payment. You will have the opportunity to add your roster of players and assign payment amounts per player after your check out step.</p>",
+        "booking_id": null,
+        "create_d": "2025-09-15T17:40:11",
+        "create_u": "nhamm",
+        "created_user_type": "SIT_Employee",
+        "customer_id": 0,
+        "desc": "",
+        "description": null,
+        "end": "2025-09-21T22:00:00",
+        "end_gmt": "2025-09-22T05:00:00",
+        "event_start_time": "20:45:00",
+        "event_type_id": "g",
+        "has_gender_locker_rooms": 0,
+        "home_score": null,
+        "hteam_id": 11007,
+        "includes_setup_time": false,
+        "includes_takedown_time": false,
+        "is_overtime": false,
+        "last_modified_user_type": "SIT_Employee",
+        "last_resource_id": null,
+        "league_id": null,
+        "locker_room_type": null,
+        "mod_d": "2025-09-19T12:51:56",
+        "mod_u": "jandrews",
+        "notice": null,
+        "outcome": "",
+        "parent_event_id": null,
+        "publish": true,
+        "register_capacity": 0,
+        "repeat_id": null,
+        "resource_area_id": 0,
+        "resource_id": 1,
+        "start": "2025-09-21T20:45:00",
+        "start_date": "2025-09-21T00:00:00",
+        "start_gmt": "2025-09-22T03:45:00",
+        "sub_type": "regular",
+        "visiting_score": null,
+        "vteam_id": 10882
+      },
+      "id": "312149",
+      "relationships": {
+        "additionalResources": [],
+        "booking": [],
+        "comments": {
+          "data": []
+        },
+        "customer": [],
+        "employees": [],
+        "eventEmployees": [],
+        "eventSeries": [],
+        "eventType": {
+          "data": {
+            "id": "g",
+            "type": "event-types"
+          }
+        },
+        "fees": [],
+        "homeTeam": {
+          "data": {
+            "id": "11007",
+            "type": "teams"
+          }
+        },
+        "invoiceItems": [],
+        "invoices": [],
+        "lastResource": [],
+        "league": [],
+        "lockers": [],
+        "parentEvent": [],
+        "registrants": [],
+        "registrations": [],
+        "resource": {
+          "data": {
+            "id": "1",
+            "type": "resources"
+          }
+        },
+        "resourceArea": {
+          "data": null
+        },
+        "rsvpStates": [],
+        "seriesInvoices": [],
+        "setupEvents": [],
+        "statEvents": [],
+        "subType": [],
+        "summary": [],
+        "takedownEvents": [],
+        "tasks": [],
+        "teamGroups": [],
+        "visitingTeam": {
+          "data": {
+            "id": "10882",
+            "type": "teams"
+          }
+        }
+      },
+      "type": "events"
+    },
+    {
+      "attributes": {
+        "active": true,
+        "code": "L",
+        "color": "#57c7cb",
+        "custom_form_id": null,
+        "description": null,
+        "has_customer": false,
+        "has_roster": false,
+        "has_team_away": true,
+        "has_team_home": true,
+        "length": "01:15:00",
+        "member_app_display_name": null,
+        "name": "Locker Room",
+        "product_id": null
+      },
+      "id": "L",
+      "relationships": {
+        "assignedFacilities": [],
+        "customForm": [],
+        "eventTypeFees": [],
+        "events": [],
+        "facilities": [],
+        "files": [],
+        "product": [],
+        "program": [],
+        "reminderEmailTemplate": [],
+        "resources": [],
+        "setupTaskAction": [],
+        "takedownTaskAction": [],
+        "termsAndConditions": []
+      },
+      "type": "event-types"
+    },
+    {
+      "attributes": {
+        "booking_option_id": null,
+        "desc": "Locker Room 11",
+        "facility_id": 1,
+        "has_agreed_terms_and_conditions": null,
+        "lat": 47.706104,
+        "lng": -122.325123,
+        "name": "LR11",
+        "terms_and_conditions_id": null,
+        "type_id": 1
+      },
+      "id": "24",
+      "relationships": {
+        "address": [],
+        "amenities": [],
+        "blockedResourceAreas": [],
+        "blockedResources": [],
+        "blockingRules": [],
+        "bookingOption": [],
+        "employee": [],
+        "eventTypes": [],
+        "facility": {
+          "data": {
+            "id": "1",
+            "type": "facilities"
+          }
+        },
+        "files": [],
+        "flattenedBlockingRules": [],
+        "inventories": [],
+        "resourceAreas": [],
+        "resourceGroups": [],
+        "resourceType": [],
+        "termsAndConditions": [],
+        "termsAndConditionsResponses": []
+      },
+      "type": "resources"
+    },
+    {
+      "attributes": {
+        "best_description": "<p>The Kraken Hockey League Features Divisions 1 to 10, and sub-divisions A to D. Division 1 is the highest level and Division 10 is beginner level.<br /><br />Deposit required to register a team is $100. This deposit will go towards the Captain's season payment. You will have the opportunity to add your roster of players and assign payment amounts per player after your check out step.</p>",
+        "booking_id": null,
+        "create_d": "2025-09-19T12:51:56",
+        "create_u": "jandrews",
+        "created_user_type": "SIT_Employee",
+        "customer_id": 0,
+        "desc": "",
+        "description": null,
+        "end": "2025-09-21T22:00:00",
+        "end_gmt": "2025-09-22T05:00:00",
+        "event_start_time": "20:45:00",
+        "event_type_id": "L",
+        "has_gender_locker_rooms": 0,
+        "home_score": null,
+        "hteam_id": 11007,
+        "includes_setup_time": false,
+        "includes_takedown_time": false,
+        "is_overtime": false,
+        "last_modified_user_type": "SIT_Employee",
+        "last_resource_id": null,
+        "league_id": null,
+        "locker_room_type": "h",
+        "mod_d": "2025-09-19T12:51:56",
+        "mod_u": "jandrews",
+        "notice": null,
+        "outcome": "",
+        "parent_event_id": 312149,
+        "publish": true,
+        "register_capacity": 0,
+        "repeat_id": null,
+        "resource_area_id": 0,
+        "resource_id": 24,
+        "start": "2025-09-21T20:45:00",
+        "start_date": "2025-09-21T00:00:00",
+        "start_gmt": "2025-09-22T03:45:00",
+        "sub_type": "regular",
+        "visiting_score": null,
+        "vteam_id": null
+      },
+      "id": "313466",
+      "relationships": {
+        "additionalResources": [],
+        "booking": [],
+        "comments": {
+          "data": []
+        },
+        "customer": [],
+        "employees": [],
+        "eventEmployees": [],
+        "eventSeries": [],
+        "eventType": {
+          "data": {
+            "id": "L",
+            "type": "event-types"
+          }
+        },
+        "fees": [],
+        "homeTeam": {
+          "data": {
+            "id": "11007",
+            "type": "teams"
+          }
+        },
+        "invoiceItems": [],
+        "invoices": [],
+        "lastResource": [],
+        "league": [],
+        "lockers": [],
+        "parentEvent": [],
+        "registrants": [],
+        "registrations": [],
+        "resource": {
+          "data": {
+            "id": "24",
+            "type": "resources"
+          }
+        },
+        "resourceArea": {
+          "data": null
+        },
+        "rsvpStates": [],
+        "seriesInvoices": [],
+        "setupEvents": [],
+        "statEvents": [],
+        "subType": [],
+        "summary": [],
+        "takedownEvents": [],
+        "tasks": [],
+        "teamGroups": [],
+        "visitingTeam": {
+          "data": null
+        }
+      },
+      "type": "events"
+    },
+    {
+      "attributes": {
+        "best_description": "<p>The Kraken Hockey League Features Divisions 1 to 10, and sub-divisions A to D. Division 1 is the highest level and Division 10 is beginner level.<br /><br />Deposit required to register a team is $100. This deposit will go towards the Captain's season payment. You will have the opportunity to add your roster of players and assign payment amounts per player after your check out step.</p>",
+        "best_free_trial_customer_limit": null,
+        "best_free_trial_cutoff": null,
+        "best_free_trial_days_before": null,
+        "best_free_trial_hours_before": 0,
+        "best_image_url": "https://dash-general.s3.us-west-2.amazonaws.com/kraken/c2e768fa-f973-43b6-915c-9ba1c6bfe60d.png",
+        "best_is_makeups_enabled": false,
+        "best_makeups_above_roster_limit": null,
+        "best_makeups_max_per_event": null,
+        "best_makeups_signup_end_hours_before": null,
+        "best_makeups_signup_start_hours_before": null,
+        "color": "#0f0f0f",
+        "days_of_week": [],
+        "description": "<p>The Kraken Hockey League Features Divisions 1 to 10, and sub-divisions A to D. Division 1 is the highest level and Division 10 is beginner level.<br /><br />Deposit required to register a team is $100. This deposit will go towards the Captain's season payment. You will have the opportunity to add your roster of players and assign payment amounts per player after your check out step.</p>",
+        "event_length": null,
+        "facility_id": 1,
+        "free_trial_cutoff": null,
+        "free_trial_days_before": null,
+        "free_trial_hours_before": null,
+        "free_trial_opt_out": true,
+        "has_free_trials": false,
+        "has_upcoming_events": true,
+        "image_url": "https://dash-general.s3.us-west-2.amazonaws.com/kraken/c2e768fa-f973-43b6-915c-9ba1c6bfe60d.png",
+        "is_flat_fee": 0,
+        "is_makeups_enabled": 0,
+        "is_private": true,
+        "is_registration_open": true,
+        "league_id": 2407,
+        "makeups_above_roster_limit": null,
+        "makeups_max_per_event": null,
+        "makeups_signup_end_hours_before": null,
+        "makeups_signup_start_hours_before": null,
+        "max_free_trials": null,
+        "max_roster_size": null,
+        "min_roster_size": null,
+        "name": "Blackbirds",
+        "num_games": 25,
+        "product_id": null,
+        "season_id": 613,
+        "sex": "c",
+        "start_date": "2025-09-21T00:00:00",
+        "status": "active",
+        "team_type": "t"
+      },
+      "id": "10997",
+      "relationships": {
+        "ageRange": [],
+        "allEvents": [],
+        "copiedFromTeams": [],
+        "copiedToTeams": [],
+        "customFieldAnswers": [],
+        "customForm": [],
+        "customerInvoices": [],
+        "customers": [],
+        "employee": [],
+        "events": [],
+        "expenses": [],
+        "facility": [],
+        "files": [],
+        "finances": [],
+        "homeEvents": [],
+        "invoiceItems": [],
+        "invoices": [],
+        "league": [],
+        "managers": [],
+        "nextHomeEvent": [],
+        "nextVisitingEvent": [],
+        "notes": [],
+        "playoffEvents": [],
+        "product": [],
+        "programType": [],
+        "purchaseOrders": [],
+        "registeredCustomers": [],
+        "registrableEvents": [],
+        "registrationInfo": [],
+        "registrations": [],
+        "rsvpStates": [],
+        "season": [],
+        "skillLevel": [],
+        "sport": [],
+        "statEvents": [],
+        "teamMessages": [],
+        "teamRequests": [],
+        "visitingEvents": [],
+        "waitlistRegistrations": []
+      },
+      "type": "teams"
+    },
+    {
+      "attributes": {
+        "active": true,
+        "email": "KrakenCommunityIceplex@SeattleKrakenHockey.com",
+        "facilityWww": null,
+        "lat": null,
+        "lng": null,
+        "my_sam_support": true,
+        "name": "Kraken Leagues",
+        "phone": "(206) 279-7770",
+        "tz": "America/Los_Angeles"
+      },
+      "id": "2",
+      "meta": {
+        "currency": null
+      },
+      "relationships": {
+        "address": [],
+        "blackoutDates": [],
+        "customers": [],
+        "employees": [],
+        "eventTypes": [],
+        "file": [],
+        "hotLists": [],
+        "inventories": [],
+        "leagues": [],
+        "lockerAreas": [],
+        "objectLabel": [],
+        "resources": [],
+        "seasons": [],
+        "teams": []
+      },
+      "type": "facilities"
+    },
+    {
+      "attributes": {
+        "booking_option_id": null,
+        "desc": "",
+        "facility_id": 2,
+        "has_agreed_terms_and_conditions": null,
+        "lat": 47.799006,
+        "lng": -122.328373,
+        "name": "Olympic View Arena",
+        "terms_and_conditions_id": null,
+        "type_id": 2
+      },
+      "id": "7",
+      "relationships": {
+        "address": [],
+        "amenities": [],
+        "blockedResourceAreas": [],
+        "blockedResources": [],
+        "blockingRules": [],
+        "bookingOption": [],
+        "employee": [],
+        "eventTypes": [],
+        "facility": {
+          "data": {
+            "id": "2",
+            "type": "facilities"
+          }
+        },
+        "files": [],
+        "flattenedBlockingRules": [],
+        "inventories": [],
+        "resourceAreas": [],
+        "resourceGroups": [],
+        "resourceType": [],
+        "termsAndConditions": [],
+        "termsAndConditionsResponses": []
+      },
+      "type": "resources"
+    },
+    {
+      "attributes": {
+        "best_description": "<p>The Kraken Hockey League Features Divisions 1 to 10, and sub-divisions A to D. Division 1 is the highest level and Division 10 is beginner level.<br /><br />Deposit required to register a team is $100. This deposit will go towards the Captain's season payment. You will have the opportunity to add your roster of players and assign payment amounts per player after your check out step.</p>",
+        "booking_id": null,
+        "create_d": "2025-09-23T16:33:59",
+        "create_u": "nhamm",
+        "created_user_type": "SIT_Employee",
+        "customer_id": 0,
+        "desc": "",
+        "description": null,
+        "end": "2025-09-28T16:30:00",
+        "end_gmt": "2025-09-28T23:30:00",
+        "event_start_time": "15:15:00",
+        "event_type_id": "g",
+        "has_gender_locker_rooms": 0,
+        "home_score": null,
+        "hteam_id": 10997,
+        "includes_setup_time": false,
+        "includes_takedown_time": false,
+        "is_overtime": false,
+        "last_modified_user_type": "SIT_Employee",
+        "last_resource_id": null,
+        "league_id": null,
+        "locker_room_type": null,
+        "mod_d": "2025-09-23T16:33:59",
+        "mod_u": "nhamm",
+        "notice": null,
+        "outcome": "",
+        "parent_event_id": null,
+        "publish": true,
+        "register_capacity": 0,
+        "repeat_id": null,
+        "resource_area_id": 0,
+        "resource_id": 7,
+        "start": "2025-09-28T15:15:00",
+        "start_date": "2025-09-28T00:00:00",
+        "start_gmt": "2025-09-28T22:15:00",
+        "sub_type": "regular",
+        "visiting_score": null,
+        "vteam_id": 11007
+      },
+      "id": "314460",
+      "relationships": {
+        "additionalResources": [],
+        "booking": [],
+        "comments": {
+          "data": []
+        },
+        "customer": [],
+        "employees": [],
+        "eventEmployees": [],
+        "eventSeries": [],
+        "eventType": {
+          "data": {
+            "id": "g",
+            "type": "event-types"
+          }
+        },
+        "fees": [],
+        "homeTeam": {
+          "data": {
+            "id": "10997",
+            "type": "teams"
+          }
+        },
+        "invoiceItems": [],
+        "invoices": [],
+        "lastResource": [],
+        "league": [],
+        "lockers": [],
+        "parentEvent": [],
+        "registrants": [],
+        "registrations": [],
+        "resource": {
+          "data": {
+            "id": "7",
+            "type": "resources"
+          }
+        },
+        "resourceArea": {
+          "data": null
+        },
+        "rsvpStates": [],
+        "seriesInvoices": [],
+        "setupEvents": [],
+        "statEvents": [],
+        "subType": [],
+        "summary": [],
+        "takedownEvents": [],
+        "tasks": [],
+        "teamGroups": [],
+        "visitingTeam": {
+          "data": {
+            "id": "11007",
+            "type": "teams"
+          }
+        }
+      },
+      "type": "events"
+    }
+  ]
+}
