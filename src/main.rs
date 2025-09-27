@@ -14,7 +14,7 @@ use crate::discord::Discord;
 async fn handler(event: LambdaEvent<String>) -> Result<String, Error> {
     // Config
     let hook_url = env::var("DISCORD_HOOK_URL").expect("DISCORD_HOOK_URL must be set");
-    let test_hook_url = env::var("TEST_DISCORD_HOOK_URL").expect("TEST_DISCORD_HOOK_URL must be set for test payloads");
+    let test_hook_url = env::var("TEST_DISCORD_HOOK_URL").expect("TEST_DISCORD_HOOK_URL must be set for tests payloads");
     let team_id = env::var("TEAM_ID").expect("TEAM_ID env var is required");
 
     let day_smart = match DaySmart::for_team(&team_id) {
@@ -26,7 +26,7 @@ async fn handler(event: LambdaEvent<String>) -> Result<String, Error> {
 
     // Select destination (simple placeholder based on payload)
     let payload = event.payload; // in future this can be derived from the Lambda event
-    let message_destination = if payload.contains("test") {
+    let message_destination = if payload.contains("tests") {
         test_hook_url
     } else {
         hook_url
@@ -34,7 +34,7 @@ async fn handler(event: LambdaEvent<String>) -> Result<String, Error> {
 
 
     // Build the next game message within 5 days
-    match day_smart.get_next_game_message(5) {
+    match day_smart.get_next_game_message(5, chrono::Utc::now()) {
         Some(message) => {
             info!(message = %message, "Prepared message");
             // Post to destination via Discord client

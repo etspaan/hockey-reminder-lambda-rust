@@ -54,7 +54,8 @@ impl DaySmart {
         }
     }
 
-    /// Construct a Daysmart instance from a raw JSON response body (no network).
+    /// Construct a DaySmart instance from a raw JSON response body (no network).
+    #[allow(dead_code)]
     pub fn from_json(body: &str) -> Result<Self, String> {
         match Self::deserialize_team_document(body) {
             Ok(doc) => {
@@ -135,8 +136,13 @@ impl DaySmart {
         let time_str = local_dt.format("%-I:%M %p").to_string();
         let jersey_color = if is_home { "Light" } else { "Dark" };
 
-        // Try to find locker room info for this game
-        let locker_line = if let Some(lr) = self.find_locker_room_for_game(game) {
+        // Use only the pre-computed locker room for our team; no fallback search here.
+        let our_locker_room: Option<String> = match (is_home, &game.home_locker_room, &game.away_locker_room) {
+            (true, Some(lr), _) => Some(lr.clone()),
+            (false, _, Some(lr)) => Some(lr.clone()),
+            _ => None,
+        };
+        let locker_line = if let Some(lr) = our_locker_room {
             format!("\nLocker Room: {}", lr)
         } else {
             String::new()
@@ -150,14 +156,12 @@ impl DaySmart {
         )
     }
 
-    /// Try to find the locker room resource name for our team associated with this game.
-    /// Strategy: look for a locker room event (event_type_id == "L") for our team (as home or visiting)
-    /// with a start time within ±8 hours of the game's start, and return the associated resource name.
-    fn find_locker_room_for_game(&self, game: &GameInfo) -> Option<String> {
+    /// Find the locker room resource name for the given team near the specified time.
+    /// Looks for an event of type "L" for that team with start within ±8 hours of dt and returns resource name.
+    fn find_locker_room_for_team_at_time(&self, team_id: i64, dt_target: chrono::DateTime<chrono::Utc>) -> Option<String> {
         use chrono::{Duration, NaiveDateTime, TimeZone, Utc};
 
         let doc = self.document.as_ref()?;
-        let our_team_id = doc.data.id.parse::<i64>().ok()?;
 
         let mut best: Option<(i64, i64)> = None; // (abs_diff_seconds, resource_id)
 
@@ -166,9 +170,9 @@ impl DaySmart {
                 if attributes.event_type_id.as_deref() != Some("L") {
                     continue;
                 }
-                // Must be our team in either slot
-                let is_ours = attributes.hteam_id == Some(our_team_id) || attributes.vteam_id == Some(our_team_id);
-                if !is_ours { continue; }
+                // Must be this team in either slot
+                let is_team = attributes.hteam_id == Some(team_id) || attributes.vteam_id == Some(team_id);
+                if !is_team { continue; }
 
                 // Must have a resource id and a parsable time
                 let Some(res_id) = attributes.resource_id else { continue; };
@@ -183,7 +187,7 @@ impl DaySmart {
 
                 let Ok(dt) = parsed_dt_utc else { continue; };
 
-                let diff = (dt - game.dt).num_seconds().abs();
+                let diff = (dt - dt_target).num_seconds().abs();
                 // Consider only events within ±8 hours
                 if diff <= Duration::hours(8).num_seconds() {
                     match best {
@@ -201,14 +205,14 @@ impl DaySmart {
     }
 
     /// Find upcoming games within the next `days_ahead` days using the stored document.
-    fn find_upcoming_games(&self, days_ahead: i64) -> Vec<GameInfo> {
+    /// Accepts a specific current time `now_utc` to make this function easier to test.
+    fn find_upcoming_games(&self, days_ahead: i64, now_utc: chrono::DateTime<chrono::Utc>) -> Vec<GameInfo> {
         use chrono::{NaiveDateTime, TimeZone, Utc, Duration};
 
         let Some(doc) = self.document.as_ref() else {
             return Vec::new();
         };
 
-        let now_utc = Utc::now();
         let window_end = now_utc + Duration::days(days_ahead);
 
         let mut games: Vec<GameInfo> = Vec::new();
@@ -228,11 +232,19 @@ impl DaySmart {
 
                     if let Ok(dt) = parsed_dt_utc {
                         if dt >= now_utc && dt <= window_end {
+                            let home_lr = attributes
+                                .hteam_id
+                                .and_then(|tid| self.find_locker_room_for_team_at_time(tid, dt));
+                            let away_lr = attributes
+                                .vteam_id
+                                .and_then(|tid| self.find_locker_room_for_team_at_time(tid, dt));
                             games.push(GameInfo {
                                 dt,
                                 h_id: attributes.hteam_id,
                                 v_id: attributes.vteam_id,
                                 res_id: attributes.resource_id,
+                                home_locker_room: home_lr,
+                                away_locker_room: away_lr,
                             });
                         }
                     }
@@ -245,13 +257,14 @@ impl DaySmart {
 
     /// Determine the next game within `days_ahead` and return a formatted message if one exists.
     /// Returns Some(String) with the formatted message when a game is found, or None if not.
-    pub fn get_next_game_message(&self, days_ahead: i64) -> Option<String> {
-        let mut games = self.find_upcoming_games(days_ahead);
+    /// Accepts a specific current time `now_utc` to make this function easier to test.
+    pub fn get_next_game_message(&self, days_ahead: i64, now_utc: chrono::DateTime<chrono::Utc>) -> Option<String> {
+        let mut games = self.find_upcoming_games(days_ahead, now_utc);
         if games.is_empty() {
             return None;
         }
         games.sort_by_key(|g| g.dt);
-        let next_game = games[0];
+        let next_game = games[0].clone();
         Some(self.format_game_message(&next_game))
     }
 }
