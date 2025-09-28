@@ -11,7 +11,7 @@ use crate::model::game::GameInfo;
 #[derive(Debug)]
 pub struct DaySmart {
     document: Option<model::team::TeamDocument>,
-    team_names: HashMap<String, String>,
+    team_names: HashMap<i64, String>,
     resource_names: HashMap<i64, String>,
 }
 
@@ -67,17 +67,21 @@ impl DaySmart {
     }
 
     /// Build lookup maps for team and resource names from a TeamDocument.
-    fn build_name_maps(doc: &model::team::TeamDocument) -> (HashMap<String, String>, HashMap<i64, String>) {
-        let mut team_names: HashMap<String, String> = HashMap::new();
+    fn build_name_maps(doc: &model::team::TeamDocument) -> (HashMap<i64, String>, HashMap<i64, String>) {
+        let mut team_names: HashMap<i64, String> = HashMap::new();
         let mut resource_names: HashMap<i64, String> = HashMap::new();
 
         // Insert our own team name from root data
-        team_names.insert(doc.data.id.clone(), doc.data.attributes.name.clone());
+        if let Ok(tid) = doc.data.id.parse::<i64>() {
+            team_names.insert(tid, doc.data.attributes.name.clone());
+        }
 
         for item in &doc.included {
             match item {
                 model::team::Included::TeamIncluded { id, attributes, .. } => {
-                    team_names.insert(id.clone(), attributes.name.clone());
+                    if let Ok(tid) = id.parse::<i64>() {
+                        team_names.insert(tid, attributes.name.clone());
+                    }
                 }
                 model::team::Included::Resource { id, attributes, .. } => {
                     if let Ok(rid) = id.parse::<i64>() {
@@ -100,30 +104,28 @@ impl DaySmart {
 
     /// Format a Discord-friendly game message using stored document and name maps.
     pub fn format_game_message(&self, game: &GameInfo) -> String {
-        // Pull team info from stored document when available
-        let (team_id_str, team_name) = if let Some(doc) = self.document.as_ref() {
-            (doc.data.id.clone(), doc.data.attributes.name.clone())
-        } else {
-            (String::new(), String::from("Team"))
-        };
+        // Pull team id from stored document when available (avoid String clones)
+        let our_team_id_i64 = self
+            .document
+            .as_ref()
+            .and_then(|doc| doc.data.id.parse::<i64>().ok());
 
-        // Resolve names
-        let h_name = game
+        // Resolve names (borrow to avoid allocations)
+        let h_name: &str = game
             .h_id
-            .and_then(|id| self.team_names.get(&id.to_string()).cloned())
-            .unwrap_or_else(|| "Home".to_string());
-        let v_name = game
+            .and_then(|id| self.team_names.get(&id).map(|s| s.as_str()))
+            .unwrap_or("Home");
+        let v_name: &str = game
             .v_id
-            .and_then(|id| self.team_names.get(&id.to_string()).cloned())
-            .unwrap_or_else(|| "Visitor".to_string());
+            .and_then(|id| self.team_names.get(&id).map(|s| s.as_str()))
+            .unwrap_or("Visitor");
 
-        let resource_name = game
+        let resource_name: &str = game
             .res_id
-            .and_then(|rid| self.resource_names.get(&rid).cloned())
-            .unwrap_or_else(|| "Unknown Arena".to_string());
+            .and_then(|rid| self.resource_names.get(&rid).map(|s| s.as_str()))
+            .unwrap_or("Unknown Arena");
 
         // Home vs away determines jersey color
-        let our_team_id_i64 = team_id_str.parse::<i64>().ok();
         let is_home = match (our_team_id_i64, game.h_id) {
             (Some(our), Some(h)) => our == h,
             _ => false,
@@ -137,18 +139,19 @@ impl DaySmart {
         let jersey_color = if is_home { "Light" } else { "Dark" };
 
         // Use only the pre-computed locker room for our team; no fallback search here.
-        let our_locker_room: Option<String> = match (is_home, &game.home_locker_room, &game.away_locker_room) {
-            (true, Some(lr), _) => Some(lr.clone()),
-            (false, _, Some(lr)) => Some(lr.clone()),
+        let our_locker_room: Option<&str> = match (is_home, game.home_locker_room.as_deref(), game.away_locker_room.as_deref()) {
+            (true, Some(lr), _) => Some(lr),
+            (false, _, Some(lr)) => Some(lr),
             _ => None,
         };
         let locker_line = if let Some(lr) = our_locker_room {
-            format!("\nLocker Room: {}", lr)
+            let mut s = String::with_capacity(12 + lr.len());
+            s.push_str("\nLocker Room: ");
+            s.push_str(lr);
+            s
         } else {
             String::new()
         };
-
-        let _ = team_name; // reserved for potential future use in the header
 
         format!(
             ":hockey: Kraken Hockey League Game :goal:\n{}\n{} at {}\n{} vs {}{}\n:shirt: {} Jerseys",
@@ -264,7 +267,6 @@ impl DaySmart {
             return None;
         }
         games.sort_by_key(|g| g.dt);
-        let next_game = games[0].clone();
-        Some(self.format_game_message(&next_game))
+        Some(self.format_game_message(&games[0]))
     }
 }
