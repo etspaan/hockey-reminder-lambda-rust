@@ -24,7 +24,6 @@ impl BenchAppCsv {
                         if code < 200 || code >= 300 {
                             eprintln!("BenchAppCsv GET non-success status: {}. Body: {}", code, body);
                         } else {
-                            println!("{}", body);
                             // Try to parse ICS into an icalendar::Calendar
                             match icalendar::parser::read_calendar(&body) {
                                 Ok(parsed) => {
