@@ -12,4 +12,7 @@ pub struct EventAttributes {
     pub vteam_id: Option<i64>,
     pub resource_id: Option<i64>,
     pub sub_type: Option<String>,
+    // Additional fields used for locker room events to associate with a game
+    pub parent_event_id: Option<i64>,
+    pub locker_room_type: Option<String>,
 }

@@ -1,7 +1,6 @@
 use chrono::{NaiveDateTime, TimeZone, Utc};
 
 use hockey_reminder_lambda_rust::model;
-use hockey_reminder_lambda_rust::model::game::GameInfo;
 use hockey_reminder_lambda_rust::daysmart::DaySmart;
 
 fn load_sample() -> String {
@@ -24,29 +23,11 @@ fn formats_specific_game_with_locker_room() {
     let json = load_sample();
     let ds = DaySmart::from_json(&json).expect("from_json failed");
 
-    // Also parse raw to locate specific event
-    let doc: model::team::TeamDocument = serde_json::from_str(&json).expect("bad sample json");
-    let mut target_game: Option<GameInfo> = None;
+    // Act: pick a fixed time before 2025-09-21 so that the next game is 2025-09-21 (event 312149)
+    let now = Utc.with_ymd_and_hms(2025, 9, 20, 0, 0, 0).unwrap();
+    let msg = ds.get_next_game_message(3, now).expect("expected a game within window");
 
-    for item in &doc.included {
-        if let model::team::Included::Event { id, attributes, .. } = item {
-            if id == "312149" {
-                // This is a game on 2025-09-21 with a known locker room within ±8 hours
-                let dt_str = attributes.start_gmt.as_ref().or(attributes.start.as_ref()).expect("missing time");
-                let dt = parse_dt(dt_str);
-                // Pre-compute locker room for the home team for this test case
-                target_game = Some(GameInfo { dt, h_id: attributes.hteam_id, v_id: attributes.vteam_id, res_id: attributes.resource_id, home_locker_room: Some("LR11".to_string()), away_locker_room: None });
-                break;
-            }
-        }
-    }
-
-    let game = target_game.expect("expected event 312149 in sample");
-
-    // Act
-    let msg = ds.format_game_message(&game);
-
-    // Assert key elements
+    // Assert key elements from the 2025-09-21 game, including locker room
     assert!(msg.contains("Kraken Hockey League Game"));
     assert!(msg.contains("Starbucks Rink 1"), "message was: {}", msg);
     assert!(msg.contains("Yacht Flippers"), "message was: {}", msg);

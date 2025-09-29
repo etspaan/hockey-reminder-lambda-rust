@@ -1,40 +1,51 @@
 use std::collections::HashMap;
 
-use tracing::{error, info};
+use tracing::{error, info, instrument, info_span};
 
 use crate::model;
-use crate::model::game::GameInfo;
+use crate::model::game::{GameInfo, GameCore};
 
-/// Simple wrapper for the Daysmart API base URL used by this application.
-///
-/// This struct intentionally contains only the URL string as requested.
+/// Simple wrapper for the DaySmart API base URL used by this application.
 #[derive(Debug)]
 pub struct DaySmart {
-    document: Option<model::team::TeamDocument>,
+    // Store our team's id directly to avoid borrowing from the document
+    our_team_id: Option<i64>,
     team_names: HashMap<i64, String>,
     resource_names: HashMap<i64, String>,
+    // Map of game event id -> (home_locker_res_id, away_locker_res_id)
+    locker_map: HashMap<i64, (Option<i64>, Option<i64>)>,
+    // Map of game event id -> core game data (parsed time and ids)
+    game_map: HashMap<i64, GameCore>,
 }
 
 impl DaySmart {
     /// Construct a Daysmart instance for a specific team id and populate it with fetched data.
+    #[instrument(level = "info", skip(team_id))]
     pub fn for_team(team_id: &str) -> Result<Self, String> {
         let daysmart_url = format!("https://apps.daysmartrecreation.com/dash/jsonapi/api/v1/teams/{}?cache[save]=false&include=events.eventType%2Cevents.homeTeam%2Cevents.visitingTeam%2Cevents.resource.facility%2Cevents.resourceArea%2Cevents.comments%2Cleague.playoffEvents.eventType%2Cleague.playoffEvents.homeTeam%2Cleague.playoffEvents.visitingTeam%2Cleague.playoffEvents.resource.facility%2Cleague.playoffEvents.resourceArea%2Cleague.playoffEvents.comments%2Cleague.programType%2Cproduct.locations%2CprogramType%2Cseason%2CskillLevel%2CageRange%2Csport&company=kraken", team_id);
-        match ureq::get(&daysmart_url).call() {
+        let response_result = {
+            let _span = info_span!("daysmart_fetch", url = %daysmart_url).entered();
+            ureq::get(&daysmart_url).call()
+        };
+        match response_result {
             Ok(response) => {
                 let mut body_reader = response.into_body();
                 match body_reader.read_to_string() {
                     Ok(body) => match Self::deserialize_team_document(&body) {
                         Ok(doc) => {
-                            let team_name = doc.data.attributes.name.clone();
                             let total_included = doc.included.len();
                             let event_count = doc
                                 .included
                                 .iter()
                                 .filter(|i| matches!(i, model::team::Included::Event { .. }))
                                 .count();
-                            let (team_names, resource_names) = Self::build_name_maps(&doc);
-                            info!(team_name = %team_name, total_included, event_count, "Constructed DaySmart with TeamDocument");
-                            Ok(DaySmart { document: Some(doc), team_names, resource_names })
+                            let our_team_id = doc.data.id.parse::<i64>().ok();
+                            let (team_names, resource_names, locker_map, game_map) = Self::build_maps(doc);
+                            let team_name_str: &str = our_team_id
+                                .and_then(|tid| team_names.get(&tid).map(|s| s.as_str()))
+                                .unwrap_or("Unknown Team");
+                            info!(team_name = %team_name_str, total_included, event_count, "Constructed DaySmart with TeamDocument");
+                            Ok(DaySmart { our_team_id, team_names, resource_names, locker_map, game_map })
                         }
                         Err(e) => {
                             error!(error = %e, "Failed to deserialize into TeamDocument during construction");
@@ -59,34 +70,87 @@ impl DaySmart {
     pub fn from_json(body: &str) -> Result<Self, String> {
         match Self::deserialize_team_document(body) {
             Ok(doc) => {
-                let (team_names, resource_names) = Self::build_name_maps(&doc);
-                Ok(DaySmart { document: Some(doc), team_names, resource_names })
+                let our_team_id = doc.data.id.parse::<i64>().ok();
+                let (team_names, resource_names, locker_map, game_map) = Self::build_maps(doc);
+                Ok(DaySmart { our_team_id, team_names, resource_names, locker_map, game_map })
             }
             Err(e) => Err(format!("Failed to deserialize into TeamDocument: {}", e)),
         }
     }
 
-    /// Build lookup maps for team and resource names from a TeamDocument.
-    fn build_name_maps(doc: &model::team::TeamDocument) -> (HashMap<i64, String>, HashMap<i64, String>) {
+    /// Build lookup maps in a single pass: team names, resource names, locker room assignments, and game core data.
+    fn build_maps(doc: model::team::TeamDocument) -> (
+        HashMap<i64, String>,                // team_names
+        HashMap<i64, String>,                // resource_names
+        HashMap<i64, (Option<i64>, Option<i64>)>, // locker_map: game_id -> (home_res_id, away_res_id)
+        HashMap<i64, GameCore>,              // game_map: game_id -> core
+    ) {
         let mut team_names: HashMap<i64, String> = HashMap::new();
         let mut resource_names: HashMap<i64, String> = HashMap::new();
+        let mut locker_map: HashMap<i64, (Option<i64>, Option<i64>)> = HashMap::new();
+        let mut game_map: HashMap<i64, GameCore> = HashMap::new();
 
-        // Insert our own team name from root data
+        // Insert our own team name from root data (move, no clone)
         if let Ok(tid) = doc.data.id.parse::<i64>() {
-            team_names.insert(tid, doc.data.attributes.name.clone());
+            team_names.insert(tid, doc.data.attributes.name);
         }
 
-        for item in &doc.included {
+        for item in doc.included.into_iter() {
             match item {
                 model::team::Included::TeamIncluded { id, attributes, .. } => {
                     if let Ok(tid) = id.parse::<i64>() {
-                        team_names.insert(tid, attributes.name.clone());
+                        team_names.insert(tid, attributes.name);
                     }
                 }
                 model::team::Included::Resource { id, attributes, .. } => {
                     if let Ok(rid) = id.parse::<i64>() {
-                        if let Some(name) = attributes.name.clone() {
+                        if let Some(name) = attributes.name {
                             resource_names.insert(rid, name);
+                        }
+                    }
+                }
+                model::team::Included::Event { id, attributes, .. } => {
+                    // Build locker map from locker room events (type L)
+                    let is_locker = attributes
+                        .event_type_id
+                        .as_deref()
+                        .map(|s| s.eq_ignore_ascii_case("L"))
+                        .unwrap_or(false);
+                    if is_locker {
+                        if let (Some(game_id), Some(res_id)) = (attributes.parent_event_id, attributes.resource_id) {
+                            let is_home = attributes
+                                .locker_room_type
+                                .as_deref()
+                                .map(|s| s.eq_ignore_ascii_case("h"))
+                                .unwrap_or(false);
+
+                            let entry = locker_map.entry(game_id).or_insert((None, None));
+                            if is_home {
+                                entry.0 = Some(res_id);
+                            } else {
+                                entry.1 = Some(res_id);
+                            }
+                        }
+                    }
+
+                    // Also build game map from game events (type G)
+                    let is_game = attributes
+                        .event_type_id
+                        .as_deref()
+                        .map(|s| s.eq_ignore_ascii_case("g"))
+                        .unwrap_or(false);
+                    if is_game {
+                        let date_str_opt = attributes.start_gmt.as_deref().or(attributes.start.as_deref());
+                        if let Some(dt_str) = date_str_opt {
+                            let parsed_dt_utc = chrono::DateTime::parse_from_rfc3339(dt_str)
+                                .map(|dt| dt.with_timezone(&chrono::Utc))
+                                .or_else(|_| {
+                                    chrono::NaiveDateTime::parse_from_str(dt_str, "%Y-%m-%dT%H:%M:%S")
+                                        .map(|naive| chrono::TimeZone::from_utc_datetime(&chrono::Utc, &naive))
+                                });
+                            if let (Ok(dt), Ok(gid)) = (parsed_dt_utc, id.parse::<i64>()) {
+                                game_map.insert(gid, GameCore { dt, h_id: attributes.hteam_id, v_id: attributes.vteam_id, res_id: attributes.resource_id });
+                            }
                         }
                     }
                 }
@@ -94,21 +158,19 @@ impl DaySmart {
             }
         }
 
-        (team_names, resource_names)
+        (team_names, resource_names, locker_map, game_map)
     }
 
     /// Deserialize the Daysmart team document from a JSON string.
+    #[instrument(level = "info", skip(body), fields(bytes = body.len()))]
     fn deserialize_team_document(body: &str) -> Result<model::team::TeamDocument, serde_json::Error> {
         serde_json::from_str::<model::team::TeamDocument>(body)
     }
 
     /// Format a Discord-friendly game message using stored document and name maps.
-    pub fn format_game_message(&self, game: &GameInfo) -> String {
-        // Pull team id from stored document when available (avoid String clones)
-        let our_team_id_i64 = self
-            .document
-            .as_ref()
-            .and_then(|doc| doc.data.id.parse::<i64>().ok());
+    fn format_game_message(&self, game: &GameInfo) -> String {
+        // Use stored team id (extracted at construction time)
+        let our_team_id_i64 = self.our_team_id;
 
         // Resolve names (borrow to avoid allocations)
         let h_name: &str = game
@@ -139,12 +201,11 @@ impl DaySmart {
         let jersey_color = if is_home { "Light" } else { "Dark" };
 
         // Use only the pre-computed locker room for our team; no fallback search here.
-        let our_locker_room: Option<&str> = match (is_home, game.home_locker_room.as_deref(), game.away_locker_room.as_deref()) {
-            (true, Some(lr), _) => Some(lr),
-            (false, _, Some(lr)) => Some(lr),
-            _ => None,
+        let our_locker_room_name: Option<&str> = {
+            let rid_opt = if is_home { game.home_locker_res_id } else { game.away_locker_res_id };
+            rid_opt.and_then(|rid| self.resource_names.get(&rid).map(|s| s.as_str()))
         };
-        let locker_line = if let Some(lr) = our_locker_room {
+        let locker_line = if let Some(lr) = our_locker_room_name {
             let mut s = String::with_capacity(12 + lr.len());
             s.push_str("\nLocker Room: ");
             s.push_str(lr);
@@ -159,100 +220,35 @@ impl DaySmart {
         )
     }
 
-    /// Find the locker room resource name for the given team near the specified time.
-    /// Looks for an event of type "L" for that team with start within ±8 hours of dt and returns resource name.
-    fn find_locker_room_for_team_at_time(&self, team_id: i64, dt_target: chrono::DateTime<chrono::Utc>) -> Option<String> {
-        use chrono::{Duration, NaiveDateTime, TimeZone, Utc};
-
-        let doc = self.document.as_ref()?;
-
-        let mut best: Option<(i64, i64)> = None; // (abs_diff_seconds, resource_id)
-
-        for item in &doc.included {
-            if let model::team::Included::Event { attributes, .. } = item {
-                if attributes.event_type_id.as_deref() != Some("L") {
-                    continue;
-                }
-                // Must be this team in either slot
-                let is_team = attributes.hteam_id == Some(team_id) || attributes.vteam_id == Some(team_id);
-                if !is_team { continue; }
-
-                // Must have a resource id and a parsable time
-                let Some(res_id) = attributes.resource_id else { continue; };
-                let date_str_opt = attributes.start_gmt.as_ref().or(attributes.start.as_ref());
-                let Some(dt_str) = date_str_opt else { continue; };
-
-                let parsed_dt_utc = chrono::DateTime::parse_from_rfc3339(dt_str)
-                    .map(|dt| dt.with_timezone(&Utc))
-                    .or_else(|_| {
-                        NaiveDateTime::parse_from_str(dt_str, "%Y-%m-%dT%H:%M:%S").map(|naive| Utc.from_utc_datetime(&naive))
-                    });
-
-                let Ok(dt) = parsed_dt_utc else { continue; };
-
-                let diff = (dt - dt_target).num_seconds().abs();
-                // Consider only events within ±8 hours
-                if diff <= Duration::hours(8).num_seconds() {
-                    match best {
-                        Some((best_diff, _)) if diff >= best_diff => {}
-                        _ => best = Some((diff, res_id)),
-                    }
-                }
-            }
-        }
-
-        if let Some((_, rid)) = best {
-            return self.resource_names.get(&rid).cloned();
-        }
-        None
-    }
 
     /// Find upcoming games within the next `days_ahead` days using the stored document.
     /// Accepts a specific current time `now_utc` to make this function easier to test.
     fn find_upcoming_games(&self, days_ahead: i64, now_utc: chrono::DateTime<chrono::Utc>) -> Vec<GameInfo> {
-        use chrono::{NaiveDateTime, TimeZone, Utc, Duration};
-
-        let Some(doc) = self.document.as_ref() else {
-            return Vec::new();
-        };
+        use chrono::Duration;
 
         let window_end = now_utc + Duration::days(days_ahead);
-
         let mut games: Vec<GameInfo> = Vec::new();
 
-        for item in &doc.included {
-            if let model::team::Included::Event { attributes, .. } = item {
-                if attributes.event_type_id.as_deref() != Some("g") {
-                    continue;
-                }
-                let date_str_opt = attributes.start_gmt.as_ref().or(attributes.start.as_ref());
-                if let Some(dt_str) = date_str_opt {
-                    let parsed_dt_utc = chrono::DateTime::parse_from_rfc3339(dt_str)
-                        .map(|dt| dt.with_timezone(&Utc))
-                        .or_else(|_| {
-                            NaiveDateTime::parse_from_str(dt_str, "%Y-%m-%dT%H:%M:%S").map(|naive| Utc.from_utc_datetime(&naive))
-                        });
-
-                    if let Ok(dt) = parsed_dt_utc {
-                        if dt >= now_utc && dt <= window_end {
-                            let home_lr = attributes
-                                .hteam_id
-                                .and_then(|tid| self.find_locker_room_for_team_at_time(tid, dt));
-                            let away_lr = attributes
-                                .vteam_id
-                                .and_then(|tid| self.find_locker_room_for_team_at_time(tid, dt));
-                            games.push(GameInfo {
-                                dt,
-                                h_id: attributes.hteam_id,
-                                v_id: attributes.vteam_id,
-                                res_id: attributes.resource_id,
-                                home_locker_room: home_lr,
-                                away_locker_room: away_lr,
-                            });
-                        }
-                    }
-                }
+        for (gid, core) in &self.game_map {
+            let dt = core.dt;
+            if dt < now_utc || dt > window_end {
+                continue;
             }
+
+            let (home_lr_id, away_lr_id) = if let Some((home_rid_opt, away_rid_opt)) = self.locker_map.get(gid) {
+                (*home_rid_opt, *away_rid_opt)
+            } else {
+                (None, None)
+            };
+
+            games.push(GameInfo {
+                dt,
+                h_id: core.h_id,
+                v_id: core.v_id,
+                res_id: core.res_id,
+                home_locker_res_id: home_lr_id,
+                away_locker_res_id: away_lr_id,
+            });
         }
 
         games

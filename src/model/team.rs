@@ -55,6 +55,13 @@ pub enum Included {
         #[serde(default)]
         relationships: Option<serde_json::Value>,
     },
+    #[serde(rename = "locker-rooms")]
+    LockerRoom {
+        id: String,
+        attributes: crate::model::locker_room::LockerRoomAttributes,
+        #[serde(default)]
+        relationships: Option<serde_json::Value>,
+    },
     #[serde(other)]
     Other,
 }
