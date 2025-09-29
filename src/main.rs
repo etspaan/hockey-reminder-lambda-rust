@@ -85,14 +85,10 @@ async fn handler(event: LambdaEvent<Request>) -> Result<Response, Error> {
                     }
                     None => {
                         use chrono::Utc;
-                        let msg = format!("No games in the next 5 days from {}.", Utc::now());
+                        let msg = format!("No games in the next 5 days from {}. Skipping Discord post.", Utc::now());
                         info!("{}", msg);
-                        if let Err(e) = discord.post(&msg) {
-                            error!(error = %e, "Failed to post DaySmart 'no games' message");
-                            summaries.push(format!("DaySmart no-game post failed: {}", e));
-                        } else {
-                            summaries.push("DaySmart: no upcoming games".to_string());
-                        }
+                        // Skip sending a Discord message when there are no upcoming games
+                        summaries.push("DaySmart: no upcoming games (skipped)".to_string());
                     }
                 }
             }
@@ -102,8 +98,18 @@ async fn handler(event: LambdaEvent<Request>) -> Result<Response, Error> {
                 let cutoff = chrono::Utc::now().naive_utc();
                 match generator.to_csv(cutoff) {
                     Ok(csv) => {
+                        // If the CSV contains only the header (no data rows), skip posting to Discord
+                        let has_rows = csv.lines().skip(1).any(|l| !l.trim().is_empty());
+                        if !has_rows {
+                            info!("No upcoming BenchApp events after cutoff; skipping Discord post");
+                            summaries.push("BenchApp: no upcoming games (skipped)".to_string());
+                            continue;
+                        }
+
                         let filename = "benchapp_schedule.csv";
-                        let content = generator.discord_message(cutoff).unwrap_or_else(|_| "BenchApp import schedule attached.".to_string());
+                        let content = generator
+                            .discord_message(cutoff)
+                            .unwrap_or_else(|_| "BenchApp import schedule attached.".to_string());
                         if let Err(e) = discord.post_with_attachment(&content, filename, csv.as_bytes()) {
                             error!(error = %e, "Failed to post BenchApp CSV to Discord");
                             summaries.push(format!("BenchApp post failed: {}", e));
