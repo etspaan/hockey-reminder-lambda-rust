@@ -1,20 +1,9 @@
-use chrono::{NaiveDateTime, TimeZone, Utc};
+use chrono::{TimeZone, Utc};
 
-use hockey_reminder_lambda_rust::model;
 use hockey_reminder_lambda_rust::daysmart::DaySmart;
 
 fn load_sample() -> String {
     std::fs::read_to_string("tests/sample_response.json").expect("failed to read sample_response.json")
-}
-
-fn parse_dt(dt_str: &str) -> chrono::DateTime<Utc> {
-    chrono::DateTime::parse_from_rfc3339(dt_str)
-        .map(|dt| dt.with_timezone(&Utc))
-        .or_else(|_| {
-            NaiveDateTime::parse_from_str(dt_str, "%Y-%m-%dT%H:%M:%S")
-                .map(|naive| Utc.from_utc_datetime(&naive))
-        })
-        .expect("failed to parse date from sample")
 }
 
 #[test]
