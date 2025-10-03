@@ -40,6 +40,22 @@ fn to_csv_emits_header_and_filters_by_cutoff() {
 }
 
 #[test]
+fn split_home_away_omits_non_team_prefix() {
+    // SUMMARY contains a league prefix followed by a dash, then the matchup using @
+    let ics = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nSUMMARY:🏒Kraken Hockey League Game - Orange Crush @ Yacht Flippers\nDTSTART:20250102T030000Z\nDTEND:20250102T040000Z\nLOCATION:Rink X\\nAddr\nDESCRIPTION:Notes here\nEND:VEVENT\nEND:VCALENDAR\n";
+    let generator = BenchAppCsv::from_ics(ics);
+    let cutoff_before = NaiveDateTime::parse_from_str("2025-01-01 00:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+
+    let csv = generator.to_csv(cutoff_before).expect("csv generation");
+    let mut lines = csv.lines();
+    let _header = lines.next().unwrap();
+    let row = lines.next().unwrap_or("");
+    // CSV columns: ..., Away, Home, ... so expect Away="Orange Crush", Home="Yacht Flippers"
+    assert!(row.contains("\"Orange Crush\","), "row was: {}", row);
+    assert!(row.contains(",\"Yacht Flippers\","), "row was: {}", row);
+}
+
+#[test]
 fn discord_message_reports_latest_or_none() {
     let ics = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nSUMMARY:Home vs Away\nDTSTART:20250102T030000Z\nEND:VEVENT\nBEGIN:VEVENT\nSUMMARY:Another vs Team\nDTSTART:20250105T030000Z\nEND:VEVENT\nEND:VCALENDAR\n";
     let generator = BenchAppCsv::from_ics(ics);

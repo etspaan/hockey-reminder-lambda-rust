@@ -163,9 +163,22 @@ fn parse_dt(s: &str) -> Option<NaiveDateTime> {
 }
 
 fn split_home_away(summary: &str) -> (String, String) {
-    if let Some((home, away)) = summary.split_once(" vs ") {
+    // Some summaries include a non-team prefix like "🏒Kraken Hockey League Game - ".
+    // If there is a " - " and the trailing part looks like a matchup, drop the prefix.
+    let trimmed = if let Some(idx) = summary.rfind(" - ") {
+        let candidate = &summary[idx + 3..];
+        if candidate.contains(" @ ") || candidate.contains(" vs ") {
+            candidate
+        } else {
+            summary
+        }
+    } else {
+        summary
+    };
+
+    if let Some((home, away)) = trimmed.split_once(" vs ") {
         (home.trim().to_string(), away.trim().to_string())
-    } else if let Some((away, home)) = summary.split_once(" @ ") { // Away @ Home
+    } else if let Some((away, home)) = trimmed.split_once(" @ ") { // Away @ Home
         (home.trim().to_string(), away.trim().to_string())
     } else {
         (String::new(), String::new())
