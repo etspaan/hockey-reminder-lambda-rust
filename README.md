@@ -10,6 +10,8 @@ The function is configured entirely via the invocation request payload (no envir
 ## Quick links
 - Official AWS docs for Rust on Lambda (read this first):
   https://docs.aws.amazon.com/lambda/latest/dg/lambda-rust.html
+- How to set up a Discord webhook:
+  https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks
 
 
 ## Request and response schema
@@ -73,7 +75,7 @@ The official guide (linked above) explains both in detail. Below are concise ste
 ### 1) Prerequisites
 - Rust toolchain installed
 - AWS account and credentials configured (AWS CLI or your preferred method)
-- A Discord Webhook URL for production mode (optionally provide a separate test webhook)
+- A Discord Webhook URL for production mode (optionally provide a separate test webhook) — see: https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks
 - Outbound internet access for the Lambda function (Discord webhooks require internet). If your Lambda runs in a VPC, ensure proper NAT/egress is configured.
 
 
