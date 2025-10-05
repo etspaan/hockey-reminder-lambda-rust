@@ -20,8 +20,8 @@ fn request_deserializes_and_defaults_workflows() {
         "mode": "test",
         "discord_hook_url": "prod",
         "test_discord_hook_url": "test",
-        "ical_url": "http://example",
-        "team_id": "123"
+        "team_id": "123",
+        "company": "acme"
     });
     let req: Request = serde_json::from_value(json).unwrap();
     assert!(req.workflows.is_empty(), "workflows should default to empty vec");
@@ -30,8 +30,8 @@ fn request_deserializes_and_defaults_workflows() {
         "mode": "production",
         "discord_hook_url": "prod",
         "test_discord_hook_url": "test",
-        "ical_url": "http://example",
         "team_id": "123",
+        "company": "acme",
         "workflows": ["benchapp", "daysmart"]
     });
     let req2: Request = serde_json::from_value(json2).unwrap();

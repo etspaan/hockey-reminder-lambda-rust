@@ -46,3 +46,26 @@ fn gets_next_upcoming_game_message() {
     // No locker room in sample for this day
     assert!(!msg.contains("Locker Room:"), "message was: {}", msg);
 }
+
+#[test]
+fn daysmart_generates_benchapp_like_csv_next_4_months() {
+    // Arrange
+    let json = load_sample();
+    let ds = DaySmart::from_json(&json).expect("from_json failed");
+
+    // Act: choose a fixed date early in September, to include 9/21 and 9/28 games within ~4 months
+    let now = Utc.with_ymd_and_hms(2025, 9, 1, 0, 0, 0).unwrap();
+    let csv = ds.to_benchapp_csv(now);
+
+    // Assert: header present
+    assert!(csv.starts_with("Type,Game Type,Title (Optional),Away,Home,Date,Time,Duration,Location (Optional),Address (Optional),Notes (Optional)\n"));
+    // Should contain at least one data row
+    assert!(csv.lines().count() > 1, "csv was: {}", csv);
+    // Contains team and location names derived from DaySmart
+    assert!(csv.contains("Yacht Flippers"), "csv was: {}", csv);
+    assert!(csv.contains("Seal Team Sticks") || csv.contains("Blackbirds"), "csv was: {}", csv);
+    assert!(csv.contains("Starbucks Rink 1") || csv.contains("Olympic View Arena"), "csv was: {}", csv);
+    // Notes should include jersey color and locker room when known
+    assert!(csv.contains("Light Jerseys") || csv.contains("Dark Jerseys"), "expected jersey note in CSV. csv was: {}", csv);
+    assert!(csv.contains("Locker Room:"), "expected locker room note in CSV when known. csv was: {}", csv);
+}

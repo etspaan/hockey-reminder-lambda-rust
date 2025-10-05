@@ -21,8 +21,8 @@ pub struct DaySmart {
 impl DaySmart {
     /// Construct a Daysmart instance for a specific team id and populate it with fetched data.
     #[instrument(level = "info", skip(team_id))]
-    pub fn for_team(team_id: &str) -> Result<Self, String> {
-        let daysmart_url = format!("https://apps.daysmartrecreation.com/dash/jsonapi/api/v1/teams/{}?cache[save]=false&include=events.eventType%2Cevents.homeTeam%2Cevents.visitingTeam%2Cevents.resource.facility%2Cevents.resourceArea%2Cevents.comments%2Cleague.playoffEvents.eventType%2Cleague.playoffEvents.homeTeam%2Cleague.playoffEvents.visitingTeam%2Cleague.playoffEvents.resource.facility%2Cleague.playoffEvents.resourceArea%2Cleague.playoffEvents.comments%2Cleague.programType%2Cproduct.locations%2CprogramType%2Cseason%2CskillLevel%2CageRange%2Csport&company=kraken", team_id);
+    pub fn for_team(team_id: &str, company: &str) -> Result<Self, String> {
+        let daysmart_url = format!("https://apps.daysmartrecreation.com/dash/jsonapi/api/v1/teams/{}?cache[save]=false&include=events.eventType%2Cevents.homeTeam%2Cevents.visitingTeam%2Cevents.resource.facility%2Cevents.resourceArea%2Cevents.comments%2Cleague.playoffEvents.eventType%2Cleague.playoffEvents.homeTeam%2Cleague.playoffEvents.visitingTeam%2Cleague.playoffEvents.resource.facility%2Cleague.playoffEvents.resourceArea%2Cleague.playoffEvents.comments%2Cleague.programType%2Cproduct.locations%2CprogramType%2Cseason%2CskillLevel%2CageRange%2Csport&company={}", team_id, company);
         let response_result = {
             let _span = info_span!("daysmart_fetch", url = %daysmart_url).entered();
             ureq::get(&daysmart_url).call()
@@ -265,4 +265,89 @@ impl DaySmart {
         games.sort_by_key(|g| g.dt);
         Some(self.format_game_message(&games[0]))
     }
+
+    /// Generate a BenchApp-compatible CSV containing all games in the next ~4 months
+    /// (120 days) from the provided current UTC time.
+    ///
+    /// Columns: Type,Game Type,Title (Optional),Away,Home,Date,Time,Duration,Location (Optional),Address (Optional),Notes (Optional)
+    pub fn to_benchapp_csv(&self, now_utc: chrono::DateTime<chrono::Utc>) -> String {
+        use chrono::{Duration, Datelike};
+        use chrono_tz::America::Los_Angeles;
+
+        // Helper to escape quotes for CSV values (match BenchAppCsv behavior)
+        fn escape_quotes(s: &str) -> String { s.replace('"', "\"") }
+
+        let mut out = String::new();
+        out.push_str("Type,Game Type,Title (Optional),Away,Home,Date,Time,Duration,Location (Optional),Address (Optional),Notes (Optional)\n");
+
+        let window_end = now_utc + Duration::days(120);
+        // Collect and sort upcoming games (with ids)
+        let mut games: Vec<(&i64, &GameCore)> = self
+            .game_map
+            .iter()
+            .filter(|(_, core)| core.dt >= now_utc && core.dt <= window_end)
+            .collect();
+        games.sort_by_key(|(_, g)| g.dt);
+
+        for (gid, core) in games.into_iter() {
+            let h_name: &str = core
+                .h_id
+                .and_then(|id| self.team_names.get(&id).map(|s| s.as_str()))
+                .unwrap_or("");
+            let v_name: &str = core
+                .v_id
+                .and_then(|id| self.team_names.get(&id).map(|s| s.as_str()))
+                .unwrap_or("");
+            let location_name: &str = core
+                .res_id
+                .and_then(|rid| self.resource_names.get(&rid).map(|s| s.as_str()))
+                .unwrap_or("");
+
+            let local_dt = core.dt.with_timezone(&Los_Angeles);
+            let date_str = format!("{}/{}/{}", local_dt.day(), local_dt.month(), local_dt.year());
+            let time_str = local_dt.format("%I:%M %p").to_string();
+            // Default to 1 hour duration when we don't have explicit end time in DaySmart core
+            let duration_str = "1:00";
+
+            // Notes: jersey color (Light/Dark) and locker room if available
+            let is_home = match (self.our_team_id, core.h_id) { (Some(our), Some(h)) => our == h, _ => false };
+            let jersey = if is_home { "Light Jerseys" } else { "Dark Jerseys" };
+            let locker_opt: Option<String> = self
+                .locker_map
+                .get(gid)
+                .and_then(|(home_lr, away_lr)| {
+                    let pick = if is_home { *home_lr } else { *away_lr };
+                    pick
+                })
+                .and_then(|rid| self.resource_names.get(&rid).map(|s| format!("Locker Room: {}", s)));
+            let notes_str: String = match locker_opt {
+                Some(lr) => format!("{}; {}", jersey, lr),
+                None => jersey.to_string(),
+            };
+
+            let row = vec![
+                "GAME".to_string(),              // Type
+                "REGULAR".to_string(),           // Game Type
+                String::new(),                    // Title (Optional)
+                v_name.to_string(),               // Away
+                h_name.to_string(),               // Home
+                date_str,                         // Date
+                time_str,                         // Time
+                duration_str.to_string(),         // Duration
+                location_name.to_string(),        // Location (Optional)
+                String::new(),                    // Address (Optional) - unknown from DaySmart
+                notes_str,                        // Notes (Optional)
+            ]
+                .into_iter()
+                .map(|s| format!("\"{}\"", escape_quotes(&s)))
+                .collect::<Vec<String>>()
+                .join(",");
+
+            out.push_str(&row);
+            out.push('\n');
+        }
+
+        out
+    }
 }
+

@@ -25,8 +25,10 @@ pub struct Request {
     pub mode: Mode,
     pub discord_hook_url: String,
     pub test_discord_hook_url: String,
-    pub ical_url: String,
+    #[serde(default)]
+    pub ical_url: Option<String>,
     pub team_id: String,
+    pub company: String,
     #[serde(default)]
     pub workflows: Vec<Workflow>,
 }
@@ -65,8 +67,9 @@ pub async fn handler(event: LambdaEvent<Request>) -> Result<Response, Error> {
                 // and we cannot borrow from `payload` across await/join points. Each task
                 // must own its inputs.
                 let team_id = payload.team_id.clone();
+                let company = payload.company.clone();
                 let handle = tokio::task::spawn_blocking(move || {
-                    let day_smart = match DaySmart::for_team(&team_id) {
+                    let day_smart = match DaySmart::for_team(&team_id, &company) {
                         Ok(ds) => ds,
                         Err(e) => {
                             let msg = format!("DaySmart init error: {}", e);
@@ -96,40 +99,43 @@ pub async fn handler(event: LambdaEvent<Request>) -> Result<Response, Error> {
                 handles.push(handle);
             }
             Workflow::Benchapp => {
-                // Clone for the same reason: the spawned blocking task needs to own a 'static
-                // String. Borrowing `&payload.ical_url` would not live long enough.
-                let ical_url = payload.ical_url.clone();
-                let handle = tokio::task::spawn_blocking(move || {
-                    // Generate BenchApp CSV from the provided iCal URL and post as an attachment
-                    let generator = BenchAppCsv::from_url(&ical_url);
-                    let cutoff = chrono::Utc::now().naive_utc();
-                    match generator.to_csv(cutoff) {
-                        Ok(csv) => {
-                            // If the CSV contains only the header (no data rows), skip posting to Discord
-                            let has_rows = csv.lines().skip(1).any(|l| !l.trim().is_empty());
-                            if !has_rows {
-                                info!("No upcoming BenchApp events after cutoff; skipping Discord post");
-                                return "BenchApp: no upcoming games (skipped)".to_string();
-                            }
+                // If the iCal URL is not provided, skip BenchApp workflow gracefully
+                if let Some(ical_url) = payload.ical_url.clone() {
+                    // Clone for the same reason: the spawned blocking task needs to own a 'static String.
+                    let handle = tokio::task::spawn_blocking(move || {
+                        // Generate BenchApp CSV from the provided iCal URL and post as an attachment
+                        let generator = BenchAppCsv::from_url(&ical_url);
+                        let cutoff = chrono::Utc::now().naive_utc();
+                        match generator.to_csv(cutoff) {
+                            Ok(csv) => {
+                                // If the CSV contains only the header (no data rows), skip posting to Discord
+                                let has_rows = csv.lines().skip(1).any(|l| !l.trim().is_empty());
+                                if !has_rows {
+                                    info!("No upcoming BenchApp events after cutoff; skipping Discord post");
+                                    return "BenchApp: no upcoming games (skipped)".to_string();
+                                }
 
-                            let filename = "benchapp_schedule.csv";
-                            let content = generator
-                                .discord_message(cutoff)
-                                .unwrap_or_else(|_| "BenchApp import schedule attached.".to_string());
-                            if let Err(e) = discord.post_with_attachment(&content, filename, csv.as_bytes()) {
-                                error!(error = %e, "Failed to post BenchApp CSV to Discord");
-                                format!("BenchApp post failed: {}", e)
-                            } else {
-                                "BenchApp CSV posted".to_string()
+                                let filename = "benchapp_schedule.csv";
+                                let content = generator
+                                    .discord_message(cutoff)
+                                    .unwrap_or_else(|_| "BenchApp import schedule attached.".to_string());
+                                if let Err(e) = discord.post_with_attachment(&content, filename, csv.as_bytes()) {
+                                    error!(error = %e, "Failed to post BenchApp CSV to Discord");
+                                    format!("BenchApp post failed: {}", e)
+                                } else {
+                                    "BenchApp CSV posted".to_string()
+                                }
+                            }
+                            Err(e) => {
+                                error!(error = %e, "Failed to generate BenchApp CSV");
+                                format!("BenchApp CSV generation failed: {}", e)
                             }
                         }
-                        Err(e) => {
-                            error!(error = %e, "Failed to generate BenchApp CSV");
-                            format!("BenchApp CSV generation failed: {}", e)
-                        }
-                    }
-                });
-                handles.push(handle);
+                    });
+                    handles.push(handle);
+                } else {
+                    info!("No ical_url provided; skipping BenchApp workflow");
+                }
             }
         }
     }
