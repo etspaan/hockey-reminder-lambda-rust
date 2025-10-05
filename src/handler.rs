@@ -24,7 +24,8 @@ pub enum Workflow {
 pub struct Request {
     pub mode: Mode,
     pub discord_hook_url: String,
-    pub test_discord_hook_url: String,
+    #[serde(default)]
+    pub test_discord_hook_url: Option<String>,
     #[serde(default)]
     pub ical_url: Option<String>,
     pub team_id: String,
@@ -45,8 +46,10 @@ pub async fn handler(event: LambdaEvent<Request>) -> Result<Response, Error> {
 
     // Select destination based on request mode
     let message_destination = match payload.mode {
-        Mode::Test => payload.test_discord_hook_url,
-        Mode::Production => payload.discord_hook_url,
+        Mode::Test => payload
+            .test_discord_hook_url
+            .unwrap_or_else(|| payload.discord_hook_url.clone()),
+        Mode::Production => payload.discord_hook_url.clone(),
     };
     let discord = Discord::new(message_destination);
 

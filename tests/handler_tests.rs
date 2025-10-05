@@ -19,7 +19,6 @@ fn request_deserializes_and_defaults_workflows() {
     let json = serde_json::json!({
         "mode": "test",
         "discord_hook_url": "prod",
-        "test_discord_hook_url": "test",
         "team_id": "123",
         "company": "acme"
     });
@@ -29,7 +28,6 @@ fn request_deserializes_and_defaults_workflows() {
     let json2 = serde_json::json!({
         "mode": "production",
         "discord_hook_url": "prod",
-        "test_discord_hook_url": "test",
         "team_id": "123",
         "company": "acme",
         "workflows": ["benchapp", "daysmart"]

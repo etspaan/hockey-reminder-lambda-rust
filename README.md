@@ -20,8 +20,8 @@ The handler expects the following JSON payload:
   - Chooses which Discord webhook to use.
 - discord_hook_url: string
   - Webhook for production mode.
-- test_discord_hook_url: string
-  - Webhook for test mode.
+- test_discord_hook_url: string (optional)
+  - Webhook for test mode. If omitted, test mode falls back to discord_hook_url.
 - ical_url: string (optional)
   - If present and the Benchapp workflow is selected, the iCal feed is fetched and converted to a BenchApp CSV.
 - team_id: string
@@ -41,7 +41,6 @@ Example minimal payload (defaults to DaySmart workflow):
 {
   "mode": "test",
   "discord_hook_url": "https://discord.com/api/webhooks/.../prod",
-  "test_discord_hook_url": "https://discord.com/api/webhooks/.../test",
   "team_id": "12345",
   "company": "acme"
 }
@@ -74,7 +73,7 @@ The official guide (linked above) explains both in detail. Below are concise ste
 ### 1) Prerequisites
 - Rust toolchain installed
 - AWS account and credentials configured (AWS CLI or your preferred method)
-- A Discord Webhook URL for both test and production modes
+- A Discord Webhook URL for production mode (optionally provide a separate test webhook)
 - Outbound internet access for the Lambda function (Discord webhooks require internet). If your Lambda runs in a VPC, ensure proper NAT/egress is configured.
 
 
