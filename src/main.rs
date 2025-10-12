@@ -1,7 +1,7 @@
 mod model;
 mod daysmart;
 mod discord;
-mod benchapp_csv;
+mod ical;
 mod handler;
 
 use lambda_runtime::{service_fn, Error};

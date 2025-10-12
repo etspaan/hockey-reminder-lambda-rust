@@ -8,8 +8,8 @@ fn serde_mode_and_workflow_lowercase() {
     let m2: Mode = serde_json::from_str("\"production\"").unwrap();
     matches!(m2, Mode::Production);
     // Workflow
-    let w: Workflow = serde_json::from_str("\"benchapp\"").unwrap();
-    matches!(w, Workflow::Benchapp);
+    let w: Workflow = serde_json::from_str("\"ical\"").unwrap();
+    matches!(w, Workflow::Ical);
     let w2: Workflow = serde_json::from_str("\"daysmart\"").unwrap();
     matches!(w2, Workflow::Daysmart);
 }
@@ -30,11 +30,11 @@ fn request_deserializes_and_defaults_workflows() {
         "discord_hook_url": "prod",
         "team_id": "123",
         "company": "acme",
-        "workflows": ["benchapp", "daysmart"]
+        "workflows": ["ical", "daysmart"]
     });
     let req2: Request = serde_json::from_value(json2).unwrap();
     assert_eq!(req2.workflows.len(), 2);
     let names: Vec<String> = req2.workflows.iter().map(|w| serde_json::to_string(w).unwrap()).collect();
-    assert!(names.contains(&"\"benchapp\"".to_string()));
+    assert!(names.contains(&"\"ical\"".to_string()));
     assert!(names.contains(&"\"daysmart\"".to_string()));
 }

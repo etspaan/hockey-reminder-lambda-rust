@@ -2,11 +2,11 @@ use chrono::{Datelike, NaiveDateTime};
 use icalendar::Component;
 
 /// Minimal BenchAppCsv type for future CSV/ICS ingestion from KHL
-pub struct BenchAppCsv {
+pub struct Ical {
     pub calendar: Option<icalendar::Calendar>,
 }
 
-impl BenchAppCsv {
+impl Ical {
     /// Construct from the provided KHL schedule URL.
     /// Performs a GET to the URL and attempts to parse the ICS into a Calendar; errors are logged.
     pub fn from_url(url: &str) -> Self {
@@ -64,7 +64,7 @@ impl BenchAppCsv {
 
     /// Generate a BenchApp import CSV representing all VEVENT entries in the ICS that start AFTER the provided cutoff datetime.
     /// Columns: Type,Game Type,Title (Optional),Away,Home,Date,Time,Duration,Location (Optional),Address (Optional),Notes (Optional)
-    pub fn to_csv(&self, cutoff: NaiveDateTime) -> Result<String, String> {
+    pub fn to_bench_app_csv(&self, cutoff: NaiveDateTime) -> Result<String, String> {
         let cal = self.calendar.as_ref().ok_or_else(|| "No ICS available".to_string())?;
 
         let mut out = String::new();

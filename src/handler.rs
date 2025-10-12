@@ -2,7 +2,7 @@ use lambda_runtime::{Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
 use tracing::{error, info, instrument};
 
-use crate::benchapp_csv::BenchAppCsv;
+use crate::ical::Ical;
 use crate::daysmart::DaySmart;
 use crate::discord::Discord;
 
@@ -16,7 +16,7 @@ pub enum Mode {
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Workflow {
-    Benchapp,
+    Ical,
     Daysmart,
 }
 
@@ -101,15 +101,15 @@ pub async fn handler(event: LambdaEvent<Request>) -> Result<Response, Error> {
                 });
                 handles.push(handle);
             }
-            Workflow::Benchapp => {
+            Workflow::Ical => {
                 // If the iCal URL is not provided, skip BenchApp workflow gracefully
                 if let Some(ical_url) = payload.ical_url.clone() {
                     // Clone for the same reason: the spawned blocking task needs to own a 'static String.
                     let handle = tokio::task::spawn_blocking(move || {
                         // Generate BenchApp CSV from the provided iCal URL and post as an attachment
-                        let generator = BenchAppCsv::from_url(&ical_url);
+                        let generator = Ical::from_url(&ical_url);
                         let cutoff = chrono::Utc::now().naive_utc();
-                        match generator.to_csv(cutoff) {
+                        match generator.to_bench_app_csv(cutoff) {
                             Ok(csv) => {
                                 // If the CSV contains only the header (no data rows), skip posting to Discord
                                 let has_rows = csv.lines().skip(1).any(|l| !l.trim().is_empty());
@@ -137,7 +137,7 @@ pub async fn handler(event: LambdaEvent<Request>) -> Result<Response, Error> {
                     });
                     handles.push(handle);
                 } else {
-                    info!("No ical_url provided; skipping BenchApp workflow");
+                    info!("No ical_url provided; skipping ical workflow");
                 }
             }
         }

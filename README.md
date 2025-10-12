@@ -25,13 +25,13 @@ The handler expects the following JSON payload:
 - test_discord_hook_url: string (optional)
   - Webhook for test mode. If omitted, test mode falls back to discord_hook_url.
 - ical_url: string (optional)
-  - If present and the Benchapp workflow is selected, the iCal feed is fetched and converted to a BenchApp CSV.
+  - If present and the ical workflow is selected, the iCal feed is fetched and converted to a BenchApp CSV.
 - team_id: string
   - Your team identifier for DaySmart.
 - company: string
   - Your company/organization identifier for DaySmart.
 - workflows: array<string> (optional)
-  - Supported values: "daysmart", "benchapp".
+  - Supported values: "daysmart", "ical".
   - If omitted or empty, the function defaults to ["daysmart"].
 
 The function returns:
@@ -56,12 +56,12 @@ Example with explicit workflows and iCal:
   "ical_url": "https://example.com/schedule.ics",
   "team_id": "12345",
   "company": "acme",
-  "workflows": ["daysmart", "benchapp"]
+  "workflows": ["daysmart", "ical"]
 }
 
 Behavioral notes:
 - If there are no upcoming games, the function skips posting to Discord and returns a summary indicating it skipped.
-- If "benchapp" is requested but ical_url is not provided, the BenchApp workflow is silently skipped.
+- If "ical" is requested but ical_url is not provided, the ical workflow is silently skipped.
 
 
 ## Build and deploy to AWS Lambda
@@ -172,7 +172,7 @@ Note: The function’s external calls (Discord, DaySmart, iCal fetching) are exe
 ## Repository layout
 - src/handler.rs — Lambda handler with request/response types and workflow orchestration
 - src/daysmart.rs — DaySmart integration and message generation
-- src/benchapp_csv.rs — BenchApp CSV generator from an iCal feed
+- src/ical.rs — BenchApp CSV generator from an iCal feed
 - src/discord.rs — Minimal Discord webhook client
 - src/main.rs — Binary entry point that wires Lambda runtime to the handler
 - tests/* — Unit tests
