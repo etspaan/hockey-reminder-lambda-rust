@@ -1,3 +1,4 @@
+use chrono::DateTime;
 use lambda_runtime::{Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
 use tracing::{error, info, instrument};
@@ -80,10 +81,11 @@ pub async fn handler(event: LambdaEvent<Request>) -> Result<Response, Error> {
                             return msg;
                         }
                     };
+                    let csv_schedule = day_smart.to_benchapp_csv(chrono::Utc::now());
                     match day_smart.get_next_game_message(5, chrono::Utc::now()) {
                         Some(message) => {
                             info!(message = %message, "Prepared DaySmart message");
-                            if let Err(e) = discord.post(&message) {
+                            if let Err(e) = discord.post_with_attachment(&message, "games.csv", csv_schedule.as_bytes()) {
                                 error!(error = %e, "Failed to post DaySmart message to Discord");
                                 format!("DaySmart post failed: {}", e)
                             } else {
@@ -99,6 +101,7 @@ pub async fn handler(event: LambdaEvent<Request>) -> Result<Response, Error> {
                         }
                     }
                 });
+
                 handles.push(handle);
             }
             Workflow::Ical => {
