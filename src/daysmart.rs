@@ -40,7 +40,7 @@ impl DaySmart {
                                 .filter(|i| matches!(i, model::team::Included::Event { .. }))
                                 .count();
                             let our_team_id = doc.data.id.parse::<i64>().ok();
-                            let (team_names, resource_names, locker_map, game_map) = Self::build_maps(doc);
+                            let (team_names, resource_names, locker_map, game_map) = Self::build_maps(doc, our_team_id);
                             let team_name_str: &str = our_team_id
                                 .and_then(|tid| team_names.get(&tid).map(|s| s.as_str()))
                                 .unwrap_or("Unknown Team");
@@ -71,7 +71,7 @@ impl DaySmart {
         match Self::deserialize_team_document(body) {
             Ok(doc) => {
                 let our_team_id = doc.data.id.parse::<i64>().ok();
-                let (team_names, resource_names, locker_map, game_map) = Self::build_maps(doc);
+                let (team_names, resource_names, locker_map, game_map) = Self::build_maps(doc, our_team_id);
                 Ok(DaySmart { our_team_id, team_names, resource_names, locker_map, game_map })
             }
             Err(e) => Err(format!("Failed to deserialize into TeamDocument: {}", e)),
@@ -79,7 +79,7 @@ impl DaySmart {
     }
 
     /// Build lookup maps in a single pass: team names, resource names, locker room assignments, and game core data.
-    fn build_maps(doc: model::team::TeamDocument) -> (
+    fn build_maps(doc: model::team::TeamDocument, our_team_id: Option<i64>) -> (
         HashMap<i64, String>,                // team_names
         HashMap<i64, String>,                // resource_names
         HashMap<i64, (Option<i64>, Option<i64>)>, // locker_map: game_id -> (home_res_id, away_res_id)
@@ -139,17 +139,25 @@ impl DaySmart {
                         .as_deref()
                         .map(|s| s.eq_ignore_ascii_case("g"))
                         .unwrap_or(false);
+                    
                     if is_game {
-                        let date_str_opt = attributes.start_gmt.as_deref().or(attributes.start.as_deref());
-                        if let Some(dt_str) = date_str_opt {
-                            let parsed_dt_utc = chrono::DateTime::parse_from_rfc3339(dt_str)
-                                .map(|dt| dt.with_timezone(&chrono::Utc))
-                                .or_else(|_| {
-                                    chrono::NaiveDateTime::parse_from_str(dt_str, "%Y-%m-%dT%H:%M:%S")
-                                        .map(|naive| chrono::TimeZone::from_utc_datetime(&chrono::Utc, &naive))
-                                });
-                            if let (Ok(dt), Ok(gid)) = (parsed_dt_utc, id.parse::<i64>()) {
-                                game_map.insert(gid, GameCore { dt, h_id: attributes.hteam_id, v_id: attributes.vteam_id, res_id: attributes.resource_id });
+                        let matches_team = our_team_id.map(|our| {
+                            attributes.hteam_id.map(|h| h == our).unwrap_or(false) ||
+                            attributes.vteam_id.map(|v| v == our).unwrap_or(false)
+                        }).unwrap_or(true);
+
+                        if matches_team {
+                            let date_str_opt = attributes.start_gmt.as_deref().or(attributes.start.as_deref());
+                            if let Some(dt_str) = date_str_opt {
+                                let parsed_dt_utc = chrono::DateTime::parse_from_rfc3339(dt_str)
+                                    .map(|dt| dt.with_timezone(&chrono::Utc))
+                                    .or_else(|_| {
+                                        chrono::NaiveDateTime::parse_from_str(dt_str, "%Y-%m-%dT%H:%M:%S")
+                                            .map(|naive| chrono::TimeZone::from_utc_datetime(&chrono::Utc, &naive))
+                                    });
+                                if let (Ok(dt), Ok(gid)) = (parsed_dt_utc, id.parse::<i64>()) {
+                                    game_map.insert(gid, GameCore { dt, h_id: attributes.hteam_id, v_id: attributes.vteam_id, res_id: attributes.resource_id });
+                                }
                             }
                         }
                     }

@@ -69,3 +69,38 @@ fn daysmart_generates_benchapp_like_csv_next_4_months() {
     assert!(csv.contains("Light Jerseys") || csv.contains("Dark Jerseys"), "expected jersey note in CSV. csv was: {}", csv);
     assert!(csv.contains("Locker Room:"), "expected locker room note in CSV when known. csv was: {}", csv);
 }
+
+#[test]
+fn filters_out_games_not_belonging_to_our_team() {
+    // Arrange
+    let mut json_obj: serde_json::Value = serde_json::from_str(&load_sample()).unwrap();
+    
+    // Create a dummy event that does NOT belong to our team (11007)
+    let dummy_event = serde_json::json!({
+        "attributes": {
+            "event_type_id": "g",
+            "hteam_id": 99998,
+            "vteam_id": 99999,
+            "start_gmt": "2025-09-25T20:00:00Z",
+            "resource_id": 1
+        },
+        "id": "999999",
+        "type": "events"
+    });
+
+    if let Some(included) = json_obj.get_mut("included").and_then(|v| v.as_array_mut()) {
+        included.push(dummy_event);
+    }
+    let json = serde_json::to_string(&json_obj).unwrap();
+
+    // Act
+    let ds = DaySmart::from_json(&json).expect("from_json failed");
+
+    // Assert: The dummy game should NOT be in the game_map
+    // We check this indirectly by seeing if get_next_game_message picks it up if we set the window.
+    let now = Utc.with_ymd_and_hms(2025, 9, 25, 0, 0, 0).unwrap();
+    let msg_opt = ds.get_next_game_message(1, now);
+    
+    // There are no other games on 9/25 in the sample, so it should be None
+    assert!(msg_opt.is_none(), "Expected no games for our team on this date, but got: {:?}", msg_opt);
+}

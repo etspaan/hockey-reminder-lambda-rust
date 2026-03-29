@@ -1,4 +1,3 @@
-use chrono::DateTime;
 use lambda_runtime::{Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
 use tracing::{error, info, instrument};
